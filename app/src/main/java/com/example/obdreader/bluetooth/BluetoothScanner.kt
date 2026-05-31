@@ -7,6 +7,7 @@ import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanResult
+import android.util.Log
 import androidx.annotation.RequiresPermission
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
@@ -15,6 +16,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+private const val TAG="BluetoothScanner"
 class BluetoothScanner(private val application: Application, private val scope: CoroutineScope) {
 
     private val bluetoothManager: BluetoothManager? =
@@ -30,6 +32,9 @@ class BluetoothScanner(private val application: Application, private val scope: 
 
     private val _devices = MutableStateFlow<Set<BluetoothDevice>>(emptySet())
     val devices: StateFlow<Set<BluetoothDevice>> = _devices.asStateFlow()
+
+    private val _chosenDevice = MutableStateFlow<BluetoothDevice?>(null)
+    val chosenDevice: StateFlow<BluetoothDevice?> = _chosenDevice.asStateFlow()
 
     private val leScanCallback = object : ScanCallback() {
         override fun onScanResult(callbackType: Int, result: ScanResult) {
@@ -80,4 +85,9 @@ class BluetoothScanner(private val application: Application, private val scope: 
 
     val isBluetoothEnabled: Boolean
         get() = bluetoothAdapter?.isEnabled ?: false
+
+    fun setChosenDevice(device: BluetoothDevice) {
+        Log.i(TAG, "setChosenDevice: Setting chosen device to $device.name")
+        _chosenDevice.value = device
+    }
 }

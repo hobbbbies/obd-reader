@@ -2,9 +2,9 @@ package com.example.obdreader.ui
 
 import android.app.Activity.RESULT_OK
 import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothDevice
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -16,12 +16,11 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.obdreader.R
-import com.example.obdreader.dataClasses.DiscoveredDevice
 import com.example.obdreader.viewmodel.ObdViewModel
 import kotlinx.coroutines.launch
-import kotlin.getValue
 
-private const val TAG="ConnectFragment"
+private const val TAG = "ConnectFragment"
+
 class ConnectFragment : Fragment(R.layout.fragment_main) {
     private val viewModel: ObdViewModel by activityViewModels()
 
@@ -37,25 +36,29 @@ class ConnectFragment : Fragment(R.layout.fragment_main) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        
+        val rvDevices = view.findViewById<RecyclerView>(R.id.rvDevices)
+        
+        // Use the new DeviceListAdapter and pass the click lambda
+        val adapter = DeviceListAdapter { device ->
+            viewModel.setChosenDevice(device)
+            Log.i(TAG, "Device selected: ${device.address}")
+        }
+
+        rvDevices?.adapter = adapter
+        rvDevices?.layoutManager = LinearLayoutManager(requireContext())
+
         if (!viewModel.isBluetoothEnabled) {
             val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
             enableBluetoothLauncher.launch(enableBtIntent)
         }
 
-        val rvDevices = view.findViewById<RecyclerView>(R.id.rvDevices)
-
-        val devices = mutableListOf<BluetoothDevice>()
-
-        val adapter = ListAdapter(devices)
-        rvDevices.adapter = adapter
-        rvDevices.layoutManager = LinearLayoutManager(requireContext())
-
+        // Observe the devices Flow and submit to the adapter
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.devices.collect {
-                for (device in it) {
-                    devices.add(device)
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.devices.collect { deviceSet ->
+                    adapter.submitList(deviceSet.toList())
                 }
-                adapter.notifyItemInserted(devices.size - 1)
             }
         }
     }

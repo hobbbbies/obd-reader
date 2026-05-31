@@ -2,6 +2,7 @@ package com.example.obdreader.viewmodel
 
 import android.Manifest
 import android.app.Application
+import android.bluetooth.BluetoothDevice
 import androidx.annotation.RequiresPermission
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -37,4 +38,8 @@ class ObdViewModel(application: Application) : AndroidViewModel(application) {
 
     val isBluetoothEnabled: Boolean
         get() = scanner.isBluetoothEnabled
+
+    fun setChosenDevice(device: BluetoothDevice) {
+        scanner.setChosenDevice(device)
+    }
 }

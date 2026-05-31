@@ -1,6 +1,7 @@
 package com.example.obdreader.ui
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -10,6 +11,7 @@ import com.example.obdreader.viewmodel.ObdViewModel
 import com.example.obdreader.ui.MainFragment
 import com.example.obdreader.ui.ConnectFragment
 
+private const val TAG="MainActivity"
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
@@ -18,19 +20,22 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        Log.i(TAG, "onCreate: Created MainActivity")
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        checkBluetoothStatus()
+        navigate(ObdViewModel.Screen.CONNECT)
+//        checkBluetoothStatus()
     }
 
     private fun checkBluetoothStatus() {
+        Log.i(TAG, "checkBluetoothStatus: Supported=${viewModel.isBluetoothSupported}, Enabled=${viewModel.isBluetoothEnabled}")
         if (!viewModel.isBluetoothSupported) {
             Toast.makeText(this, "Device does not support Bluetooth", Toast.LENGTH_LONG).show()
             return
         }
 
         if (!viewModel.isBluetoothEnabled) {
+            Log.i(TAG, "checkBluetoothStatus: Navigating to ConnectFragment")
             navigate(ObdViewModel.Screen.CONNECT)
         }
     }

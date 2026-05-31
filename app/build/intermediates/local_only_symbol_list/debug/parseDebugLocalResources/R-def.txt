@@ -1,7 +1,17 @@
 R_DEF: Internal format may change without notice
 local
-id helloText
+color Primary
+drawable bg_row_item
+id host
+id rvDevices
+id tvName
+id tvTitle
 layout activity_main
+layout fragment_connect
+layout fragment_main
+layout text_row_item
 string app_name
+string discovered_device
 string hello_world
+string pair_text
 style Theme.ObdReader
